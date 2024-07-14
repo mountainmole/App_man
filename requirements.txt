@@ -1,6 +1,6 @@
 dash==2.14.2
 folium==0.14.0
 osmnx==1.9.3
-pandas==2.2.2
+pandas>=1.3.0  # Updated to a valid version or remove the version specifier
 plotly==5.22.0
 Shapely==2.0.5
