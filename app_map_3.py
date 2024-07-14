@@ -60,7 +60,7 @@ for idx, row in merged_gdf_dec.iterrows():
                     f"<b>Average Price:</b> {round(row['Average Price'],1)}<br>"
                     f"<b>Active:</b> {round(row['Active'], 1)}<br>"
                     f"<b>Inactive:</b> {round(row['Inactive'], 1)}<br>"
-                    f"<b>Rental Yield:</b> {row['Rental Yield']*100:.2f}%")
+                    f"<b>Rental Yield:</b> {row['Rental Yield']*100:.1f}%")
     folium.GeoJson(row.geometry, tooltip=tooltip_text).add_to(m)
 
 # Save the map to an HTML file
@@ -134,6 +134,18 @@ def determine_background_color(metric, variance):
     elif metric in negative_metrics:
         return 'background-color: green;' if variance < 0 else 'background-color: yellow;'
     return ''
+
+# Function to format values
+def format_value(value, metric):
+    if metric in ['Billed', 'Received', 'Balance', 'Average Price']:
+        return f"{value:.1f}"
+    elif metric in ['Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others']:
+        return f"{value * 100:.1f}%"
+    return value
+
+# Format the summary metrics values
+summary_metrics['December Value'] = summary_metrics.apply(lambda row: format_value(row['December Value'], row['Metric']), axis=1)
+summary_metrics['November Value'] = summary_metrics.apply(lambda row: format_value(row['November Value'], row['Metric']), axis=1)
 
 # Create the Dash app
 app = dash.Dash(__name__)
@@ -346,7 +358,7 @@ def update_charts(selected_precinct):
             title='Billed, Received, Balance, and Rental Yield Over Time',
             xaxis=dict(title='Bill Due Month'),
             yaxis=dict(title='Amount'),
-            yaxis2=dict(title='Rental Yield (%)', overlaying='y', side='right', tickformat='.2f'),
+            yaxis2=dict(title='Rental Yield (%)', overlaying='y', side='right', tickformat='.1f'),
             barmode='group',
             legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         )
@@ -394,7 +406,7 @@ def update_charts(selected_precinct):
             title='Contract Metrics Over Time',
             xaxis=dict(title='Bill Due Month'),
             yaxis=dict(title='Count'),
-            yaxis2=dict(title='Renewal Rate (%)', overlaying='y', side='right', tickformat='.2f'),
+            yaxis2=dict(title='Renewal Rate (%)', overlaying='y', side='right', tickformat='.1f'),
             barmode='group',
             legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         )
@@ -438,7 +450,7 @@ def update_charts(selected_precinct):
             title='Tickets and SLA Metrics Over Time',
             xaxis=dict(title='Bill Due Month'),
             yaxis=dict(title='Tickets Count'),
-            yaxis2=dict(title='Percentage (%)', overlaying='y', side='right', tickformat='.2%'),
+            yaxis2=dict(title='Percentage (%)', overlaying='y', side='right', tickformat='.1f'),
             barmode='stack',
             legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         )
