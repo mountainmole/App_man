@@ -8,13 +8,6 @@ import plotly.express as px
 import plotly.graph_objects as go
 import requests
 
-import locale
-try:
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-except locale.Error:
-    print("Locale setting not supported. Using default locale settings.")
-
-
 # Define the place you want to get data for
 place = 'Al Muneera, Abu Dhabi, United Arab Emirates'
 
@@ -52,13 +45,6 @@ filtered_excel_data_nov = filtered_excel_data_nov[columns_to_display]
 
 # Merge the GeoDataFrame with the filtered Excel data for December
 merged_gdf_dec = gdf_filtered.merge(filtered_excel_data_dec, how='inner', left_on='name', right_on='Precinct Name')
-
-# Function to format values in UAE Dirhams
-def format_currency(value):
-    try:
-        return locale.currency(value, grouping=True)
-    except:
-        return value
 
 # Create a folium map
 center = merged_gdf_dec.geometry.unary_union.centroid
@@ -148,23 +134,6 @@ def determine_background_color(metric, variance):
     elif metric in negative_metrics:
         return 'background-color: green;' if variance < 0 else 'background-color: yellow;'
     return ''
-
-# Function to format values in UAE Dirhams
-def format_currency(value):
-    try:
-        return locale.currency(value, grouping=True)
-    except:
-        return value
-
-# Format columns for currency and percentage
-summary_metrics['December Value'] = summary_metrics.apply(
-    lambda row: format_currency(row['December Value']) if row['Metric'] not in ['Units', 'Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Expired', 'Units rent delayed', 'Tickets'] else f"{round(row['December Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others'] else round(row['December Value'], 2),
-    axis=1
-)
-summary_metrics['November Value'] = summary_metrics.apply(
-    lambda row: format_currency(row['November Value']) if row['Metric'] not in ['Units', 'Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Expired', 'Units rent delayed', 'Tickets'] else f"{round(row['November Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others'] else round(row['November Value'], 2),
-    axis=1
-)
 
 # Create the Dash app
 app = dash.Dash(__name__)
@@ -474,4 +443,3 @@ def update_charts(selected_precinct):
 
 if __name__ == '__main__':
     app.run_server(debug=True, host='0.0.0.0', port=8050)
-
