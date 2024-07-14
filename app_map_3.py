@@ -1,17 +1,18 @@
 import osmnx as ox
-import pandas as pd
 import dash
 from dash import html, dcc, Input, Output, dash_table
 import folium
+import locale
 from shapely.geometry import Point, Polygon
 import plotly.express as px
 import plotly.graph_objects as go
-import locale
-try:
-    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
-except locale.Error:
-    print("Locale setting not supported. Using default locale settings.")
+import pandas as pd
+import json
+import requests
 
+
+# Set locale to UAE for currency formatting
+locale.setlocale(locale.LC_ALL, 'en_AE.UTF-8')
 
 # Define the place you want to get data for
 place = 'Al Muneera, Abu Dhabi, United Arab Emirates'
@@ -30,12 +31,14 @@ gdf_filtered = gdf[gdf['name'].isin(names_to_keep)]
 # Drop duplicates to keep only distinct names
 gdf_filtered = gdf_filtered.drop_duplicates(subset='name')
 
-# Read the updated Excel file
-excel_data = pd.read_excel('D:/Exalogic_work/raw_Data_Dash_fin.xlsx')  # Ensure this path is correct
+# Fetch the data from GitHub
+url = 'https://raw.githubusercontent.com/yourusername/yourrepository/main/data_dict.json'  # Replace with your actual URL
+response = requests.get(url)
+data_dict = response.json()
 
-# Print column names to check for discrepancies
-print("Excel columns:", excel_data.columns)
-
+# Convert the simulated data dictionary to a DataFrame
+excel_data = pd.DataFrame(data_dict)
+excel_data['bill_due_month'] = pd.to_datetime(excel_data['bill_due_month'])# Continue with your existing code
 # Filter the data for the months of November and December 2023
 excel_data['bill_due_month'] = pd.to_datetime(excel_data['bill_due_month'])
 filtered_excel_data_dec = excel_data[excel_data['bill_due_month'] == '2023-12-31']
@@ -99,6 +102,10 @@ summary_metrics_dec = filtered_excel_data_dec.agg({
     'Type others': 'mean'
 }).reset_index()
 summary_metrics_dec.columns = ['Metric', 'December Value']
+summary_metrics_dec['December Value'] = summary_metrics_dec.apply(
+    lambda row: format_currency(row['December Value']) if row['Metric'] not in ['Units', 'Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Exprired', 'Units rent delayed', 'Tickets'] else f"{round(row['December Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others'] else round(row['December Value'], 2),
+    axis=1
+)
 
 # Calculate summary metrics for the table for November
 summary_metrics_nov = filtered_excel_data_nov.agg({
@@ -122,26 +129,32 @@ summary_metrics_nov = filtered_excel_data_nov.agg({
     'Type others': 'mean'
 }).reset_index()
 summary_metrics_nov.columns = ['Metric', 'November Value']
-
-# Merge the summary metrics for both months
-summary_metrics = pd.merge(summary_metrics_dec, summary_metrics_nov, on='Metric')
-
-# Calculate variance before formatting
-summary_metrics['Variance'] = summary_metrics.apply(
-    lambda row: row['December Value'] - row['November Value'] if isinstance(row['December Value'], (int, float)) and isinstance(row['November Value'], (int, float)) else "N/A",
-    axis=1
-)
-
-# Format the values after calculating variance
-summary_metrics['December Value'] = summary_metrics.apply(
-    lambda row: format_currency(row['December Value']) if row['Metric'] not in ['Units', 'Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Exprired', 'Units rent delayed', 'Tickets'] else f"{round(row['December Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others'] else round(row['December Value'], 2),
-    axis=1
-)
-summary_metrics['November Value'] = summary_metrics.apply(
+summary_metrics_nov['November Value'] = summary_metrics_nov.apply(
     lambda row: format_currency(row['November Value']) if row['Metric'] not in ['Units', 'Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Exprired', 'Units rent delayed', 'Tickets'] else f"{round(row['November Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others'] else round(row['November Value'], 2),
     axis=1
 )
 
+# Merge the summary metrics for both months
+# Continue merging the summary metrics for both months
+summary_metrics = pd.merge(summary_metrics_dec, summary_metrics_nov, on='Metric')
+summary_metrics['Variance'] = summary_metrics.apply(
+    lambda row: round(float(str(row['December Value']).replace('AED', '').replace(',', '').replace('%', '').strip())) - round(float(str(row['November Value']).replace('AED', '').replace(',', '').replace('%', '').strip())), 2) if 'AED' in str(row['December Value']) and 'AED' in str(row['November Value']) else f"{round(float(str(row['December Value']).replace('%', '').strip()) - float(str(row['November Value']).replace('%', '').strip()), 2)}%" if '%' in str(row['December Value']) and '%' in str(row['November Value']) else round(row['December Value'] - row['November Value'], 2) if isinstance(row['December Value'], (int, float)) and isinstance(row['November Value'], (int, float)) else "N/A",
+    axis=1
+)
+
+# Apply conditional formatting for color coding
+def determine_background_color(metric, variance):
+    positive_metrics = ['Billed', 'Received', 'Balance', 'Active', 'Rental Yeild', 'Renewal Rate', 'Renewed', 'SLA', 'Type Access', 'Type Facalites', 'Type others']
+    negative_metrics = ['Contracts expiring', 'Exprired', 'Units rent delayed', 'Tickets', 'Inactive']
+    if variance == "N/A":
+        return ''
+    elif metric in positive_metrics:
+        return 'background-color: green;' if variance > 0 else 'background-color: yellow;'
+    elif metric in negative_metrics:
+        return 'background-color: green;' if variance < 0 else 'background-color: yellow;'
+    return ''
+
+# Create the Dash app
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
@@ -449,3 +462,4 @@ def update_charts(selected_precinct):
 
 if __name__ == '__main__':
     app.run_server(debug=True)
+
