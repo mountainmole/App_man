@@ -346,7 +346,9 @@ def update_charts(selected_precinct):
             title='Billed, Received, Balance, and Rental Yield Over Time',
             xaxis=dict(title='Bill Due Month'),
             yaxis=dict(title='Amount'),
-            yaxis2=dict(title='Rental Yield (%)', overlaying='y', side='right', tickformat='.2f')
+            yaxis2=dict(title='Rental Yield (%)', overlaying='y', side='right', tickformat='.2f'),
+            barmode='group',
+            legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         )
         
         # Calculate additional metrics
@@ -392,7 +394,9 @@ def update_charts(selected_precinct):
             title='Contract Metrics Over Time',
             xaxis=dict(title='Bill Due Month'),
             yaxis=dict(title='Count'),
-            yaxis2=dict(title='Renewal Rate (%)', overlaying='y', side='right', tickformat='.2f')
+            yaxis2=dict(title='Renewal Rate (%)', overlaying='y', side='right', tickformat='.2f'),
+            barmode='group',
+            legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         )
         
         # Melt the dataframe for SLA metrics
@@ -435,7 +439,8 @@ def update_charts(selected_precinct):
             xaxis=dict(title='Bill Due Month'),
             yaxis=dict(title='Tickets Count'),
             yaxis2=dict(title='Percentage (%)', overlaying='y', side='right', tickformat='.2%'),
-            barmode='stack'
+            barmode='stack',
+            legend=dict(orientation="h", yanchor="bottom", y=1, xanchor="right", x=1)
         )
         
         return combined_fig, additional_fig, contract_fig, sla_fig
