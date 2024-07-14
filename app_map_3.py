@@ -419,13 +419,14 @@ def update_charts(selected_precinct):
         # Create a bar chart for SLA metrics with stacked percentages
         sla_fig = go.Figure()
 
-        # Add Tickets as a line on primary y-axis
-        sla_fig.add_trace(
-            go.Scatter(x=sla_melted_data[sla_melted_data['Metric'] == 'Tickets']['bill_due_month'],
-                       y=sla_melted_data[sla_melted_data['Metric'] == 'Tickets']['Percentage'],
-                       name='Tickets',
-                       mode='lines+markers')
-        )
+        # Add Type Access, Type Facilities, and Type others as stacked bars on secondary y-axis
+        for metric in ['Type Access', 'Type Facilities', 'Type others']:
+            sla_fig.add_trace(
+                go.Bar(x=sla_melted_data[sla_melted_data['Metric'] == metric]['bill_due_month'],
+                       y=sla_melted_data[sla_melted_data['Metric'] == metric]['Percentage'] * 100,
+                       name=metric,
+                       yaxis='y2')
+            )
 
         # Add SLA as a line on secondary y-axis
         sla_fig.add_trace(
@@ -436,14 +437,13 @@ def update_charts(selected_precinct):
                        mode='lines+markers')
         )
 
-        # Add Type Access, Type Facilities, and Type others as stacked bars on secondary y-axis
-        for metric in ['Type Access', 'Type Facilities', 'Type others']:
-            sla_fig.add_trace(
-                go.Bar(x=sla_melted_data[sla_melted_data['Metric'] == metric]['bill_due_month'],
-                       y=sla_melted_data[sla_melted_data['Metric'] == metric]['Percentage'] * 100,
-                       name=metric,
-                       yaxis='y2')
-            )
+        # Add Tickets as a line on primary y-axis, ensuring it is added last to be on top
+        sla_fig.add_trace(
+            go.Scatter(x=sla_melted_data[sla_melted_data['Metric'] == 'Tickets']['bill_due_month'],
+                       y=sla_melted_data[sla_melted_data['Metric'] == 'Tickets']['Percentage'],
+                       name='Tickets',
+                       mode='lines+markers')
+        )
 
         # Update layout for dual y-axis and stacked bars
         sla_fig.update_layout(
