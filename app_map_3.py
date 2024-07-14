@@ -46,7 +46,7 @@ filtered_excel_data_dec = excel_data[excel_data['bill_due_month'] == '2023-12-31
 filtered_excel_data_nov = excel_data[excel_data['bill_due_month'] == '2023-11-30']
 
 # Select relevant columns for display
-columns_to_display = ['Precinct Name', 'bill_due_month', 'Billed', 'Received', 'Balance', 'Service charge', 'Rent', 'Misc.', 'Units', 'Average Price', 'Active', 'Inactive', 'Rental Yeild', 'Contracts expiring', 'Renewal Rate', 'Renewed', 'Exprired', 'Units rent delayed', 'Tickets', 'SLA', 'Type Access', 'Type Facalites', 'Type others']
+columns_to_display = ['Precinct Name', 'bill_due_month', 'Billed', 'Received', 'Balance', 'Service charge', 'Rent', 'Misc.', 'Units', 'Average Price', 'Active', 'Inactive', 'Rental Yield', 'Contracts expiring', 'Renewal Rate', 'Renewed', 'Expired', 'Units rent delayed', 'Tickets', 'SLA', 'Type Access', 'Type Facilities', 'Type others']
 filtered_excel_data_dec = filtered_excel_data_dec[columns_to_display]
 filtered_excel_data_nov = filtered_excel_data_nov[columns_to_display]
 
@@ -74,7 +74,7 @@ for idx, row in merged_gdf_dec.iterrows():
                     f"<b>Average Price:</b> {format_currency(row['Average Price'])}<br>"
                     f"<b>Active:</b> {round(row['Active'], 1)}<br>"
                     f"<b>Inactive:</b> {round(row['Inactive'], 1)}<br>"
-                    f"<b>Rental Yield:</b> {row['Rental Yeild']*100:.2f}%")
+                    f"<b>Rental Yield:</b> {row['Rental Yield']*100:.2f}%")
     folium.GeoJson(row.geometry, tooltip=tooltip_text).add_to(m)
 
 # Save the map to an HTML file
@@ -93,16 +93,16 @@ summary_metrics_dec = filtered_excel_data_dec.agg({
     'Average Price': 'mean',
     'Active': 'sum',
     'Inactive': 'sum',
-    'Rental Yeild': 'mean',
+    'Rental Yield': 'mean',
     'Contracts expiring': 'sum',
     'Renewal Rate': 'mean',
     'Renewed': 'sum',
-    'Exprired': 'sum',
+    'Expired': 'sum',
     'Units rent delayed': 'sum',
     'Tickets': 'sum',
     'SLA': 'mean',
     'Type Access': 'mean',
-    'Type Facalites': 'mean',
+    'Type Facilities': 'mean',
     'Type others': 'mean'
 }).reset_index()
 summary_metrics_dec.columns = ['Metric', 'December Value']
@@ -116,16 +116,16 @@ summary_metrics_nov = filtered_excel_data_nov.agg({
     'Average Price': 'mean',
     'Active': 'sum',
     'Inactive': 'sum',
-    'Rental Yeild': 'mean',
+    'Rental Yield': 'mean',
     'Contracts expiring': 'sum',
     'Renewal Rate': 'mean',
     'Renewed': 'sum',
-    'Exprired': 'sum',
+    'Expired': 'sum',
     'Units rent delayed': 'sum',
     'Tickets': 'sum',
     'SLA': 'mean',
     'Type Access': 'mean',
-    'Type Facalites': 'mean',
+    'Type Facilities': 'mean',
     'Type others': 'mean'
 }).reset_index()
 summary_metrics_nov.columns = ['Metric', 'November Value']
@@ -139,8 +139,8 @@ summary_metrics['Variance'] = summary_metrics.apply(
 
 # Apply conditional formatting for color coding
 def determine_background_color(metric, variance):
-    positive_metrics = ['Billed', 'Received', 'Balance', 'Active', 'Rental Yeild', 'Renewal Rate', 'Renewed', 'SLA', 'Type Access', 'Type Facalites', 'Type others']
-    negative_metrics = ['Contracts expiring', 'Exprired', 'Units rent delayed', 'Tickets', 'Inactive']
+    positive_metrics = ['Billed', 'Received', 'Balance', 'Active', 'Rental Yield', 'Renewal Rate', 'Renewed', 'SLA', 'Type Access', 'Type Facilities', 'Type others']
+    negative_metrics = ['Contracts expiring', 'Expired', 'Units rent delayed', 'Tickets', 'Inactive']
     if variance == "N/A":
         return ''
     elif metric in positive_metrics:
@@ -158,11 +158,11 @@ def format_currency(value):
 
 # Format columns for currency and percentage
 summary_metrics['December Value'] = summary_metrics.apply(
-    lambda row: format_currency(row['December Value']) if row['Metric'] not in ['Units', 'Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Exprired', 'Units rent delayed', 'Tickets'] else f"{round(row['December Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others'] else round(row['December Value'], 2),
+    lambda row: format_currency(row['December Value']) if row['Metric'] not in ['Units', 'Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Expired', 'Units rent delayed', 'Tickets'] else f"{round(row['December Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others'] else round(row['December Value'], 2),
     axis=1
 )
 summary_metrics['November Value'] = summary_metrics.apply(
-    lambda row: format_currency(row['November Value']) if row['Metric'] not in ['Units', 'Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Exprired', 'Units rent delayed', 'Tickets'] else f"{round(row['November Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yeild', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facalites', 'Type others'] else round(row['November Value'], 2),
+    lambda row: format_currency(row['November Value']) if row['Metric'] not in ['Units', 'Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others', 'Active', 'Inactive', 'Contracts expiring', 'Renewed', 'Expired', 'Units rent delayed', 'Tickets'] else f"{round(row['November Value'] * 100, 2)}%" if row['Metric'] in ['Rental Yield', 'Renewal Rate', 'SLA', 'Type Access', 'Type Facilities', 'Type others'] else round(row['November Value'], 2),
     axis=1
 )
 
@@ -230,11 +230,11 @@ app.layout = html.Div([
                     'backgroundColor': 'green'
                 },
                 {
-                    'if': {'filter_query': '{Metric} = "Rental Yeild" && {Variance} > 0', 'column_id': 'Variance'},
+                    'if': {'filter_query': '{Metric} = "Rental Yield" && {Variance} > 0', 'column_id': 'Variance'},
                     'backgroundColor': 'green'
                 },
                 {
-                    'if': {'filter_query': '{Metric} = "Rental Yeild" && {Variance} <= 0', 'column_id': 'Variance'},
+                    'if': {'filter_query': '{Metric} = "Rental Yield" && {Variance} <= 0', 'column_id': 'Variance'},
                     'backgroundColor': 'yellow'
                 },
                 {
@@ -262,11 +262,11 @@ app.layout = html.Div([
                     'backgroundColor': 'yellow'
                 },
                 {
-                    'if': {'filter_query': '{Metric} = "Exprired" && {Variance} > 0', 'column_id': 'Variance'},
+                    'if': {'filter_query': '{Metric} = "Expired" && {Variance} > 0', 'column_id': 'Variance'},
                     'backgroundColor': 'yellow'
                 },
                 {
-                    'if': {'filter_query': '{Metric} = "Exprired" && {Variance} <= 0', 'column_id': 'Variance'},
+                    'if': {'filter_query': '{Metric} = "Expired" && {Variance} <= 0', 'column_id': 'Variance'},
                     'backgroundColor': 'green'
                 },
                 {
@@ -302,11 +302,11 @@ app.layout = html.Div([
                     'backgroundColor': 'yellow'
                 },
                 {
-                    'if': {'filter_query': '{Metric} = "Type Facalites" && {Variance} > 0', 'column_id': 'Variance'},
+                    'if': {'filter_query': '{Metric} = "Type Facilities" && {Variance} > 0', 'column_id': 'Variance'},
                     'backgroundColor': 'green'
                 },
                 {
-                    'if': {'filter_query': '{Metric} = "Type Facalites" && {Variance} <= 0', 'column_id': 'Variance'},
+                    'if': {'filter_query': '{Metric} = "Type Facilities" && {Variance} <= 0', 'column_id': 'Variance'},
                     'backgroundColor': 'yellow'
                 },
                 {
@@ -366,7 +366,7 @@ def update_charts(selected_precinct):
         # Add Rental Yield as a line on the secondary y-axis
         combined_fig.add_trace(
             go.Scatter(x=data['bill_due_month'],
-                       y=data['Rental Yeild'] * 100,
+                       y=data['Rental Yield'] * 100,
                        name='Rental Yield (%)',
                        yaxis='y2',
                        mode='lines+markers')
@@ -396,13 +396,13 @@ def update_charts(selected_precinct):
         
         # Melt the dataframe for contract metrics
         contract_melted_data = data.melt(id_vars=['bill_due_month'], 
-                                         value_vars=['Contracts expiring', 'Renewal Rate', 'Renewed', 'Exprired', 'Units rent delayed'],
+                                         value_vars=['Contracts expiring', 'Renewal Rate', 'Renewed', 'Expired', 'Units rent delayed'],
                                          var_name='Metric', value_name='Count')
         
         # Create a bar chart for contract metrics and add Renewal Rate as a line on the secondary axis
         contract_fig = go.Figure()
 
-        for metric in ['Contracts expiring', 'Renewed', 'Exprired', 'Units rent delayed']:
+        for metric in ['Contracts expiring', 'Renewed', 'Expired', 'Units rent delayed']:
             contract_fig.add_trace(
                 go.Bar(x=contract_melted_data[contract_melted_data['Metric'] == metric]['bill_due_month'],
                        y=contract_melted_data[contract_melted_data['Metric'] == metric]['Count'],
@@ -428,7 +428,7 @@ def update_charts(selected_precinct):
         
         # Melt the dataframe for SLA metrics
         sla_melted_data = data.melt(id_vars=['bill_due_month'], 
-                                    value_vars=['Tickets', 'SLA', 'Type Access', 'Type Facalites', 'Type others'],
+                                    value_vars=['Tickets', 'SLA', 'Type Access', 'Type Facilities', 'Type others'],
                                     var_name='Metric', value_name='Percentage')
 
         # Create a bar chart for SLA metrics with stacked percentages
@@ -451,8 +451,8 @@ def update_charts(selected_precinct):
                        mode='lines+markers')
         )
 
-        # Add Type Access, Type Facalites, and Type others as stacked bars on secondary y-axis
-        for metric in ['Type Access', 'Type Facalites', 'Type others']:
+        # Add Type Access, Type Facilities, and Type others as stacked bars on secondary y-axis
+        for metric in ['Type Access', 'Type Facilities', 'Type others']:
             sla_fig.add_trace(
                 go.Bar(x=sla_melted_data[sla_melted_data['Metric'] == metric]['bill_due_month'],
                        y=sla_melted_data[sla_melted_data['Metric'] == metric]['Percentage'] * 100,
