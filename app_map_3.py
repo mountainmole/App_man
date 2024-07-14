@@ -3,13 +3,11 @@ import pandas as pd
 import dash
 from dash import html, dcc, Input, Output, dash_table
 import folium
-import locale
 from shapely.geometry import Point, Polygon
 import plotly.express as px
 import plotly.graph_objects as go
-
-# Set locale to UAE for currency formatting
-locale.setlocale(locale.LC_ALL, 'en_AE.UTF-8')
+import locale
+locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
 
 # Define the place you want to get data for
 place = 'Al Muneera, Abu Dhabi, United Arab Emirates'
