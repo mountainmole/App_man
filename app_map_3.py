@@ -7,7 +7,11 @@ from shapely.geometry import Point, Polygon
 import plotly.express as px
 import plotly.graph_objects as go
 import locale
-locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+try:
+    locale.setlocale(locale.LC_ALL, 'en_US.UTF-8')
+except locale.Error:
+    print("Locale setting not supported. Using default locale settings.")
+
 
 # Define the place you want to get data for
 place = 'Al Muneera, Abu Dhabi, United Arab Emirates'
