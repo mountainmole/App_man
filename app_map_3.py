@@ -67,11 +67,11 @@ m = folium.Map(location=[center.y, center.x], zoom_start=17)
 # Add the filtered polygon data to the map with clickable polygons
 for idx, row in merged_gdf_dec.iterrows():
     tooltip_text = (f"<b>Precinct Name:</b> {row['Precinct Name']}<br>"
-                    f"<b>Billed:</b> {format_currency(row['Billed'])}<br>"
-                    f"<b>Received:</b> {format_currency(row['Received'])}<br>"
-                    f"<b>Balance:</b> {format_currency(row['Balance'])}<br>"
+                    f"<b>Billed:</b> {round(row['Billed'],1)}<br>"
+                    f"<b>Received:</b> {round(row['Received'],1)}<br>"
+                    f"<b>Balance:</b> {round(row['Balance'],1)}<br>"
                     f"<b>Units:</b> {round(row['Units'], 1)}<br>"
-                    f"<b>Average Price:</b> {format_currency(row['Average Price'])}<br>"
+                    f"<b>Average Price:</b> {round(row['Average Price'],1)}<br>"
                     f"<b>Active:</b> {round(row['Active'], 1)}<br>"
                     f"<b>Inactive:</b> {round(row['Inactive'], 1)}<br>"
                     f"<b>Rental Yield:</b> {row['Rental Yield']*100:.2f}%")
@@ -170,7 +170,7 @@ summary_metrics['November Value'] = summary_metrics.apply(
 app = dash.Dash(__name__)
 
 app.layout = html.Div([
-    html.H1("Al Muneera Financial Data Visualization"),
+    html.H1("Al Muneera Details"),
     html.Div([
         html.Iframe(id='map', srcDoc=html_content, width='50%', height='400'),
         dash_table.DataTable(
@@ -182,7 +182,7 @@ app.layout = html.Div([
                 'textAlign': 'left',
                 'padding': '5px',
                 'fontFamily': 'Arial',
-                'fontSize': '14px'
+                'fontSize': '15px'
             },
             style_header={
                 'backgroundColor': 'lightgrey',
